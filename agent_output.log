@@ -1,0 +1,8 @@
+INFO:slixmpp.features.feature_mechanisms.mechanisms:Authentication failed: not-authorized
+INFO:slixmpp.features.feature_bind.bind:JID set to: agentbakor@xmpp.jp/92992154324142530141354217410
+INFO:spade.Agent:Agent agentbakor@xmpp.jp connected and authenticated.
+INFO:sensor_agent:agentbakor starting setup
+/workspaces/intelligent-agents-dcit403/sensor_agent.py:18: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().isoformat() + "Z"
+INFO:sensor_agent:Percept: {'timestamp': '2026-01-29T09:43:32.686504Z', 'severity': 'low', 'damage': 17}
+INFO:sensor_agent:Agent started. Press Ctrl+C to stop.
