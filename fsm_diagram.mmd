@@ -1,0 +1,14 @@
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> ALERT : new_event (severity != none)
+    ALERT --> RESPONDING : allocate_resources
+    RESPONDING --> RESCUING : arrive_on_scene
+    RESPONDING --> IDLE : false_alarm
+    RESCUING --> RECOVERING : rescue_complete
+    RECOVERING --> IDLE : mission_closed
+    IDLE --> [*]
+
+    %% Notes:
+    %% - Events come from `event_logs.txt` (sensor reports).
+    %% - Decisions (allocate_resources, arrive_on_scene, etc.) are made
+    %%   by the reactive agent in `lab3_agent.py` based on severity/damage.
