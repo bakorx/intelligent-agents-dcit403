@@ -2,7 +2,7 @@ import asyncio
 import logging
 import random
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import argparse
 
 from spade.agent import Agent
@@ -15,7 +15,7 @@ logger = logging.getLogger("sensor_agent")
 class SensorAgent(Agent):
     class SenseBehaviour(PeriodicBehaviour):
         async def run(self):
-            ts = datetime.utcnow().isoformat() + "Z"
+            ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             severity = random.choice(["none", "low", "medium", "high", "critical"])
             damage = random.randint(0, 100)
             event = {"timestamp": ts, "severity": severity, "damage": damage}
@@ -40,12 +40,13 @@ def main():
     parser.add_argument("--jid", default="agentbakor@xmpp.jp", help="Agent JID")
     parser.add_argument("--password", default="bakoragent", help="Agent password")
     parser.add_argument("--period", type=int, default=5, help="Behaviour period (seconds)")
+    parser.add_argument("--auto-register", action="store_true", help="Attempt to auto-register the agent on the XMPP server")
     args = parser.parse_args()
 
     agent = SensorAgent(args.jid, args.password, behaviour_period=args.period)
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(agent.start())
+        loop.run_until_complete(agent.start(auto_register=args.auto_register))
     except Exception as e:
         logger.error("Agent failed to start: %s", e)
         return

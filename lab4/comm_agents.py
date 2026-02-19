@@ -7,8 +7,8 @@ performs a simulated action (writes to `message_logs.txt`) and replies with
 an `INFORM` acknowledgement.
 
 Usage (example, requires XMPP server access and valid credentials):
-    python comm_agents.py --coordinator-jid coord@xmpp.jp --coordinator-pass pwd \
-        --responder-jid responder@xmpp.jp --responder-pass pwd
+    python comm_agents.py --coordinator-jid agentbakor@xmpp.jp --coordinator-pass bakoragent \
+        --responder-jid agentbakor@xmpp.jp --responder-pass bakoragent --auto-register
 
 If you do not have an XMPP server available, you can still inspect the code
 and the sample `message_logs.txt` included in the repo.
@@ -96,12 +96,12 @@ class CoordinatorAgent(Agent):
         self.add_behaviour(self.ReceiveInformBehaviour())
 
 
-async def run_agents(coord_jid, coord_pwd, resp_jid, resp_pwd, runtime=10):
+async def run_agents(coord_jid, coord_pwd, resp_jid, resp_pwd, runtime=10, auto_register=False):
     coord = CoordinatorAgent(coord_jid, coord_pwd, responder_jid=resp_jid)
     resp = ResponderAgent(resp_jid, resp_pwd)
 
-    await resp.start()
-    await coord.start()
+    await resp.start(auto_register=auto_register)
+    await coord.start(auto_register=auto_register)
 
     try:
         await asyncio.sleep(runtime)
@@ -115,7 +115,7 @@ def main():
     basic_jid = None
     basic_pass = None
     try:
-        with open("basic_agent.py", "r") as bf:
+        with open("../lab1/basic_agent.py", "r") as bf:
             content = bf.read()
             m_jid = re.search(r"add_argument\(\"--jid\",\s*default=\"([^\"]+)\"", content)
             m_pw = re.search(r"add_argument\(\"--password\",\s*default=\"([^\"]+)\"", content)
@@ -127,17 +127,18 @@ def main():
         pass
 
     parser = argparse.ArgumentParser(description="Run coordinator and responder agents (SPADE)")
-    parser.add_argument("--coordinator-jid", default=(basic_jid or "coordinator@xmpp.jp"), help="Coordinator JID")
-    parser.add_argument("--coordinator-pass", default=(basic_pass or "coordpass"), help="Coordinator password")
-    parser.add_argument("--responder-jid", default=(basic_jid or "responder@xmpp.jp"), help="Responder JID")
-    parser.add_argument("--responder-pass", default=(basic_pass or "responderpass"), help="Responder password")
+    parser.add_argument("--coordinator-jid", default="agentbakor@xmpp.jp", help="Coordinator JID")
+    parser.add_argument("--coordinator-pass", default="bakoragent", help="Coordinator password")
+    parser.add_argument("--responder-jid", default="agentbakor@xmpp.jp", help="Responder JID")
+    parser.add_argument("--responder-pass", default="bakoragent", help="Responder password")
     parser.add_argument("--runtime", type=int, default=10, help="Seconds to run the demo agents")
+    parser.add_argument("--auto-register", action="store_true", help="Attempt to auto-register the agents on the XMPP server")
     args = parser.parse_args()
 
     # ensure log file exists
     open(LOG_FILE, "a").close()
 
-    asyncio.run(run_agents(args.coordinator_jid, args.coordinator_pass, args.responder_jid, args.responder_pass, runtime=args.runtime))
+    asyncio.run(run_agents(args.coordinator_jid, args.coordinator_pass, args.responder_jid, args.responder_pass, runtime=args.runtime, auto_register=args.auto_register))
 
 
 if __name__ == "__main__":
