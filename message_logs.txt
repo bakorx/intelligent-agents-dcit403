@@ -2,3 +2,23 @@
 2026-02-19T14:43:49.115044Z RECEIVED from agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-19T14:43:49.114631Z', 'severity': 'high', 'damage': 75}
 2026-02-19T14:43:49.115201Z ACTION: handling_event {'timestamp': '2026-02-19T14:43:49.114631Z', 'severity': 'high', 'damage': 75}
 2026-02-19T14:43:49.115403Z RECEIVED from agentbakor@xmpp.jp performative=inform body={'status': 'processed', 'timestamp': '2026-02-19T14:43:49.115263Z'}
+2026-02-25T19:45:53.215766Z SENT to agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-25T19:45:53.215647Z', 'severity': 'high', 'damage': 75}
+2026-02-25T19:45:53.216894Z RECEIVED from agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-25T19:45:53.215647Z', 'severity': 'high', 'damage': 75}
+2026-02-25T19:45:53.217054Z ACTION: handling_event {'timestamp': '2026-02-25T19:45:53.215647Z', 'severity': 'high', 'damage': 75}
+2026-02-25T19:45:53.217257Z RECEIVED from agentbakor@xmpp.jp performative=inform body={'status': 'processed', 'timestamp': '2026-02-25T19:45:53.217110Z'}
+2026-02-26T01:25:09.659423Z SENT to agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:25:09.659278Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:25:09.660069Z RECEIVED from agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:25:09.659278Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:25:09.660235Z ACTION: deploy_ladder_truck_and_hose_team | fire_type=structural, location=Block B, spread_rate=6.3m/min, casualties=4
+2026-02-26T01:25:09.660432Z RECEIVED from agentbakor@xmpp.jp performative=inform body={'status': 'processed', 'action_taken': 'deploy_ladder_truck_and_hose_team', 'location': 'Block B', 'timestamp': '2026-02-26T01:25:09.660314Z'}
+2026-02-26T01:25:17.608141Z SENT to agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:25:17.607970Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:25:17.608342Z RECEIVED from agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:25:17.607970Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:25:17.608536Z ACTION: deploy_ladder_truck_and_hose_team | fire_type=structural, location=Block B, spread_rate=6.3m/min, casualties=4
+2026-02-26T01:25:17.608726Z RECEIVED from agentbakor@xmpp.jp performative=inform body={'status': 'processed', 'action_taken': 'deploy_ladder_truck_and_hose_team', 'location': 'Block B', 'timestamp': '2026-02-26T01:25:17.608607Z'}
+2026-02-26T01:25:35.884057Z SENT to agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:25:35.883836Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:25:35.884287Z RECEIVED from agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:25:35.883836Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:25:35.884470Z ACTION: deploy_ladder_truck_and_hose_team | fire_type=structural, location=Block B, spread_rate=6.3m/min, casualties=4
+2026-02-26T01:25:35.884652Z RECEIVED from agentbakor@xmpp.jp performative=inform body={'status': 'processed', 'action_taken': 'deploy_ladder_truck_and_hose_team', 'location': 'Block B', 'timestamp': '2026-02-26T01:25:35.884528Z'}
+2026-02-26T01:26:34.340417Z SENT to agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:26:34.340268Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:26:34.340644Z RECEIVED from agentbakor@xmpp.jp performative=request body={'timestamp': '2026-02-26T01:26:34.340268Z', 'severity': 'high', 'damage': 75, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 6.3, 'casualties': 4}
+2026-02-26T01:26:34.340805Z ACTION: deploy_ladder_truck_and_hose_team | fire_type=structural, location=Block B, spread_rate=6.3m/min, casualties=4
+2026-02-26T01:26:34.340996Z RECEIVED from agentbakor@xmpp.jp performative=inform body={'status': 'processed', 'action_taken': 'deploy_ladder_truck_and_hose_team', 'location': 'Block B', 'timestamp': '2026-02-26T01:26:34.340860Z'}

@@ -11,15 +11,31 @@ from spade.behaviour import PeriodicBehaviour
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sensor_agent")
 
+FIRE_TYPES = ["structural", "wildfire", "electrical", "chemical", "vehicle"]
+LOCATIONS = ["Block A", "Block B", "Warehouse", "Forest Zone", "Industrial Park"]
+SEVERITIES = ["none", "low", "medium", "high", "critical"]
+
 
 class SensorAgent(Agent):
     class SenseBehaviour(PeriodicBehaviour):
         async def run(self):
             ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-            severity = random.choice(["none", "low", "medium", "high", "critical"])
+            severity = random.choice(SEVERITIES)
             damage = random.randint(0, 100)
-            event = {"timestamp": ts, "severity": severity, "damage": damage}
-            # Log to console and append to file
+            fire_type = random.choice(FIRE_TYPES) if severity != "none" else "none"
+            location = random.choice(LOCATIONS)
+            spread_rate = round(random.uniform(0.0, 10.0), 2)   # metres per minute
+            casualties = random.randint(0, 20) if severity in ("high", "critical") else 0
+
+            event = {
+                "timestamp": ts,
+                "severity": severity,
+                "damage": damage,
+                "fire_type": fire_type,
+                "location": location,
+                "spread_rate": spread_rate,
+                "casualties": casualties,
+            }
             logger.info(f"Percept: {event}")
             with open("event_logs.txt", "a") as f:
                 f.write(f"{event}\n")
@@ -31,12 +47,11 @@ class SensorAgent(Agent):
 
     def __init__(self, jid, password, behaviour_period=5):
         super().__init__(jid, password)
-        # store period for behaviour creation inside setup
         self.behaviour_period = behaviour_period
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run SensorAgent (SPADE)")
+    parser = argparse.ArgumentParser(description="Run FireSensorAgent (SPADE)")
     parser.add_argument("--jid", default="agentbakor@xmpp.jp", help="Agent JID")
     parser.add_argument("--password", default="bakoragent", help="Agent password")
     parser.add_argument("--period", type=int, default=5, help="Behaviour period (seconds)")
@@ -67,3 +82,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -1,24 +1,20 @@
-"""Lab 4 — Agent communication using FIPA-ACL (SPADE)
+"""Lab 4 — Agent communication using FIPA-ACL (SPADE) — Fire Disaster
 
-This module contains two simple SPADE agents demonstrating ACL message
-exchange using `REQUEST` and `INFORM` performatives. The CoordinatorAgent
-sends a `REQUEST` to the ResponderAgent; the Responder parses the message,
-performs a simulated action (writes to `message_logs.txt`) and replies with
-an `INFORM` acknowledgement.
+CoordinatorAgent sends a REQUEST containing a fire incident event to the
+ResponderAgent. The Responder parses the message, performs a simulated
+fire-handling action, logs it to message_logs.txt, and replies with an
+INFORM acknowledgement.
 
-Usage (example, requires XMPP server access and valid credentials):
+Usage (requires XMPP server access and valid credentials):
     python comm_agents.py --coordinator-jid agentbakor@xmpp.jp --coordinator-pass bakoragent \
         --responder-jid agentbakor@xmpp.jp --responder-pass bakoragent --auto-register
-
-If you do not have an XMPP server available, you can still inspect the code
-and the sample `message_logs.txt` included in the repo.
 """
 import argparse
 import asyncio
 import ast
 import time
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 from spade.agent import Agent
 from spade.behaviour import OneShotBehaviour, CyclicBehaviour
@@ -26,9 +22,18 @@ from spade.message import Message
 
 LOG_FILE = "message_logs.txt"
 
+FIRE_RESPONSE_ACTIONS = {
+    "structural": "deploy_ladder_truck_and_hose_team",
+    "wildfire":   "dispatch_aerial_support_and_ground_crew",
+    "electrical": "isolate_power_and_deploy_co2_units",
+    "chemical":   "activate_hazmat_team_and_foam_suppression",
+    "vehicle":    "deploy_dry_powder_units",
+    "none":       "stand_down_units",
+}
+
 
 def ts():
-    return datetime.utcnow().isoformat() + "Z"
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 class ResponderAgent(Agent):
@@ -38,26 +43,37 @@ class ResponderAgent(Agent):
             if msg:
                 perf = msg.metadata.get("performative", "")
                 content = msg.body or ""
-                # log incoming message
+
                 with open(LOG_FILE, "a") as f:
                     f.write(f"{ts()} RECEIVED from {str(msg.sender)} performative={perf} body={content}\n")
 
-                # handle REQUEST performative
                 if perf.lower() == "request":
-                    # parse body if it's a dict repr
                     try:
                         event = ast.literal_eval(content)
                     except Exception:
                         event = {"raw": content}
 
-                    # Simulate action: write event handling to log
-                    with open(LOG_FILE, "a") as f:
-                        f.write(f"{ts()} ACTION: handling_event {event}\n")
+                    fire_type = event.get("fire_type", "none")
+                    location = event.get("location", "unknown")
+                    spread_rate = event.get("spread_rate", 0.0)
+                    casualties = event.get("casualties", 0)
+                    action = FIRE_RESPONSE_ACTIONS.get(fire_type, "deploy_general_fire_units")
 
-                    # reply with INFORM to confirm action
+                    with open(LOG_FILE, "a") as f:
+                        f.write(
+                            f"{ts()} ACTION: {action} | "
+                            f"fire_type={fire_type}, location={location}, "
+                            f"spread_rate={spread_rate}m/min, casualties={casualties}\n"
+                        )
+
                     reply = Message(to=str(msg.sender))
                     reply.set_metadata("performative", "inform")
-                    reply.body = str({"status": "processed", "timestamp": ts()})
+                    reply.body = str({
+                        "status": "processed",
+                        "action_taken": action,
+                        "location": location,
+                        "timestamp": ts(),
+                    })
                     await self.send(reply)
 
     async def setup(self):
@@ -67,8 +83,16 @@ class ResponderAgent(Agent):
 class CoordinatorAgent(Agent):
     class SendRequestBehaviour(OneShotBehaviour):
         async def run(self):
-            # build a sample event and send as REQUEST
-            event = {"timestamp": ts(), "severity": "high", "damage": 75}
+            # Build a sample fire incident event
+            event = {
+                "timestamp": ts(),
+                "severity": "high",
+                "damage": 75,
+                "fire_type": "structural",
+                "location": "Block B",
+                "spread_rate": 6.3,
+                "casualties": 4,
+            }
             msg = Message(to=self.agent.responder_jid)
             msg.set_metadata("performative", "request")
             msg.body = str(event)
@@ -90,9 +114,7 @@ class CoordinatorAgent(Agent):
         self.responder_jid = responder_jid
 
     async def setup(self):
-        # send a single request shortly after startup
         self.add_behaviour(self.SendRequestBehaviour())
-        # listen for INFORM responses
         self.add_behaviour(self.ReceiveInformBehaviour())
 
 
@@ -111,34 +133,22 @@ async def run_agents(coord_jid, coord_pwd, resp_jid, resp_pwd, runtime=10, auto_
 
 
 def main():
-    # Attempt to read default credentials from basic_agent.py if present
-    basic_jid = None
-    basic_pass = None
-    try:
-        with open("../lab1/basic_agent.py", "r") as bf:
-            content = bf.read()
-            m_jid = re.search(r"add_argument\(\"--jid\",\s*default=\"([^\"]+)\"", content)
-            m_pw = re.search(r"add_argument\(\"--password\",\s*default=\"([^\"]+)\"", content)
-            if m_jid:
-                basic_jid = m_jid.group(1)
-            if m_pw:
-                basic_pass = m_pw.group(1)
-    except FileNotFoundError:
-        pass
-
-    parser = argparse.ArgumentParser(description="Run coordinator and responder agents (SPADE)")
-    parser.add_argument("--coordinator-jid", default="agentbakor@xmpp.jp", help="Coordinator JID")
-    parser.add_argument("--coordinator-pass", default="bakoragent", help="Coordinator password")
-    parser.add_argument("--responder-jid", default="agentbakor@xmpp.jp", help="Responder JID")
-    parser.add_argument("--responder-pass", default="bakoragent", help="Responder password")
-    parser.add_argument("--runtime", type=int, default=10, help="Seconds to run the demo agents")
-    parser.add_argument("--auto-register", action="store_true", help="Attempt to auto-register the agents on the XMPP server")
+    parser = argparse.ArgumentParser(description="Run fire coordinator and responder agents (SPADE)")
+    parser.add_argument("--coordinator-jid", default="agentbakor@xmpp.jp")
+    parser.add_argument("--coordinator-pass", default="bakoragent")
+    parser.add_argument("--responder-jid", default="agentbakor@xmpp.jp")
+    parser.add_argument("--responder-pass", default="bakoragent")
+    parser.add_argument("--runtime", type=int, default=10)
+    parser.add_argument("--auto-register", action="store_true")
     args = parser.parse_args()
 
-    # ensure log file exists
     open(LOG_FILE, "a").close()
 
-    asyncio.run(run_agents(args.coordinator_jid, args.coordinator_pass, args.responder_jid, args.responder_pass, runtime=args.runtime, auto_register=args.auto_register))
+    asyncio.run(run_agents(
+        args.coordinator_jid, args.coordinator_pass,
+        args.responder_jid, args.responder_pass,
+        runtime=args.runtime, auto_register=args.auto_register,
+    ))
 
 
 if __name__ == "__main__":

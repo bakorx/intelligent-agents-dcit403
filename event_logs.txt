@@ -1,6 +1,6 @@
-{'timestamp': '2026-02-19T14:28:04.551944Z', 'severity': 'none', 'damage': 79}
-{'timestamp': '2026-02-19T14:28:55.817849Z', 'severity': 'none', 'damage': 50}
-{'timestamp': '2026-02-19T14:29:38.492212Z', 'severity': 'low', 'damage': 18}
-{'timestamp': '2026-02-19T14:29:49.041270Z', 'severity': 'medium', 'damage': 72}
-{'timestamp': '2026-02-19T14:38:03.665118Z', 'severity': 'low', 'damage': 55}
-{'timestamp': '2026-02-19T14:39:26.100894Z', 'severity': 'critical', 'damage': 21}
+{'timestamp': '2026-01-29T09:43:32.686504Z', 'severity': 'low', 'damage': 17, 'fire_type': 'electrical', 'location': 'Block A', 'spread_rate': 1.2, 'casualties': 0}
+{'timestamp': '2026-01-29T09:44:29.352033Z', 'severity': 'high', 'damage': 50, 'fire_type': 'structural', 'location': 'Block B', 'spread_rate': 5.7, 'casualties': 3}
+{'timestamp': '2026-01-29T09:49:02.069312Z', 'severity': 'critical', 'damage': 99, 'fire_type': 'wildfire', 'location': 'Forest Zone', 'spread_rate': 9.8, 'casualties': 12}
+{'timestamp': '2026-01-29T18:11:35.224857Z', 'severity': 'critical', 'damage': 34, 'fire_type': 'chemical', 'location': 'Industrial Park', 'spread_rate': 7.3, 'casualties': 8}
+{'timestamp': '2026-02-19T14:17:54.698735Z', 'severity': 'none', 'damage': 0, 'fire_type': 'none', 'location': 'Warehouse', 'spread_rate': 0.0, 'casualties': 0}{'timestamp': '2026-02-26T01:21:17.436896Z', 'severity': 'none', 'damage': 67, 'fire_type': 'none', 'location': 'Warehouse', 'spread_rate': 4.81, 'casualties': 0}
+{'timestamp': '2026-02-26T01:24:04.101325Z', 'severity': 'critical', 'damage': 15, 'fire_type': 'chemical', 'location': 'Block B', 'spread_rate': 6.41, 'casualties': 9}

@@ -1,18 +1,14 @@
-"""Lab 3 — Goals, Events, and Reactive Behavior
-
-This module implements a reactive agent using a Finite State Machine (FSM) to handle
-disaster response scenarios. The agent monitors `event_logs.txt` for sensor reports,
-transitions between states based on event severity and response actions, and logs
-its execution trace to `lab3_execution.txt`.
+"""Lab 3 — Goals, Events, and Reactive Behavior (Fire Disaster)
 
 FSM States:
-- IDLE: Waiting for events
-- ALERT: Event detected, assessing
-- RESPONDING: Resources allocated, moving to scene
-- RESCUING: On scene, performing rescue
-- RECOVERING: Rescue complete, recovering
+- IDLE:        Monitoring — no active fire incident
+- ALERT:       Fire signal detected, assessing fire type and spread rate
+- RESPONDING:  Fire units dispatched, en route to location
+- SUPPRESSING: On scene, actively suppressing the fire
+- RECOVERING:  Fire contained, site safety check and handover
 
-Transitions triggered by sensor events and simulated actions.
+Transitions triggered by fire sensor events from event_logs.txt.
+All state transitions and actions are logged to lab3_execution.txt.
 """
 import asyncio
 import time
@@ -24,10 +20,16 @@ from spade.behaviour import CyclicBehaviour
 LOG_FILE = "../lab2/event_logs.txt"
 EXECUTION_LOG = "lab3_execution.txt"
 
+# Thresholds for fire response decisions
+HIGH_SPREAD_THRESHOLD = 5.0    # metres per minute — triggers rapid response
+CRITICAL_DAMAGE_THRESHOLD = 70  # damage value — escalates to full suppression mode
+
+
 def ts():
     return datetime.utcnow().isoformat() + "Z"
 
-class ReactiveAgent(Agent):
+
+class FireResponseAgent(Agent):
     class FSMBehaviour(CyclicBehaviour):
         def __init__(self):
             super().__init__()
@@ -36,7 +38,7 @@ class ReactiveAgent(Agent):
             self.current_event = None
 
         async def run(self):
-            # Read latest event from log
+            # Read latest fire event from log
             try:
                 with open(LOG_FILE, "r") as f:
                     lines = f.readlines()
@@ -55,71 +57,101 @@ class ReactiveAgent(Agent):
             except FileNotFoundError:
                 pass
 
-            # Simulate state transitions and actions
             await self.perform_actions()
-
-            await asyncio.sleep(1)  # Check every second
+            await asyncio.sleep(1)
 
         async def handle_event(self, event):
             severity = event.get("severity", "none")
+            fire_type = event.get("fire_type", "unknown")
+            spread_rate = event.get("spread_rate", 0.0)
+            damage = event.get("damage", 0)
+            location = event.get("location", "unknown")
+            casualties = event.get("casualties", 0)
+
             with open(EXECUTION_LOG, "a") as f:
                 f.write(f"{ts()} EVENT: {event}\n")
 
             if self.state == "IDLE" and severity != "none":
                 self.state = "ALERT"
                 with open(EXECUTION_LOG, "a") as f:
-                    f.write(f"{ts()} STATE: IDLE -> ALERT (new_event)\n")
+                    f.write(
+                        f"{ts()} STATE: IDLE -> ALERT "
+                        f"(fire_detected | type={fire_type}, location={location}, "
+                        f"spread_rate={spread_rate}m/min)\n"
+                    )
+
             elif self.state == "ALERT":
-                # Simulate allocate_resources
+                # Decide response level based on spread rate and damage
                 await asyncio.sleep(0.5)
+                if spread_rate >= HIGH_SPREAD_THRESHOLD or damage >= CRITICAL_DAMAGE_THRESHOLD:
+                    response = "dispatch_rapid_fire_units"
+                else:
+                    response = "dispatch_standard_fire_units"
                 self.state = "RESPONDING"
                 with open(EXECUTION_LOG, "a") as f:
-                    f.write(f"{ts()} STATE: ALERT -> RESPONDING (allocate_resources)\n")
+                    f.write(
+                        f"{ts()} STATE: ALERT -> RESPONDING "
+                        f"({response} | casualties={casualties})\n"
+                    )
+
             elif self.state == "RESPONDING":
-                # Simulate arrive_on_scene
+                # Simulate units arriving on scene
                 await asyncio.sleep(0.5)
-                self.state = "RESCUING"
+                self.state = "SUPPRESSING"
                 with open(EXECUTION_LOG, "a") as f:
-                    f.write(f"{ts()} STATE: RESPONDING -> RESCUING (arrive_on_scene)\n")
-            elif self.state == "RESCUING":
-                # Simulate rescue_complete
+                    f.write(
+                        f"{ts()} STATE: RESPONDING -> SUPPRESSING "
+                        f"(units_arrived_on_scene | fire_type={fire_type})\n"
+                    )
+
+            elif self.state == "SUPPRESSING":
+                # Simulate fire suppression reducing damage
+                suppressed_damage = max(0, damage - random_suppression())
                 await asyncio.sleep(0.5)
                 self.state = "RECOVERING"
                 with open(EXECUTION_LOG, "a") as f:
-                    f.write(f"{ts()} STATE: RESCUING -> RECOVERING (rescue_complete)\n")
+                    f.write(
+                        f"{ts()} STATE: SUPPRESSING -> RECOVERING "
+                        f"(fire_contained | damage reduced to {suppressed_damage})\n"
+                    )
+
             elif self.state == "RECOVERING":
-                # Simulate mission_closed
+                # Site safety check and mission closure
                 await asyncio.sleep(0.5)
                 self.state = "IDLE"
                 with open(EXECUTION_LOG, "a") as f:
-                    f.write(f"{ts()} STATE: RECOVERING -> IDLE (mission_closed)\n")
+                    f.write(
+                        f"{ts()} STATE: RECOVERING -> IDLE "
+                        f"(site_cleared | mission_closed)\n"
+                    )
 
         async def perform_actions(self):
-            # Additional actions based on state
             if self.state == "ALERT":
-                print(f"{ts()} Agent assessing situation...")
+                print(f"{ts()} [ALERT] Assessing fire type, location, and spread rate...")
             elif self.state == "RESPONDING":
-                print(f"{ts()} Agent allocating resources and responding...")
-            elif self.state == "RESCUING":
-                print(f"{ts()} Agent performing rescue operations...")
+                print(f"{ts()} [RESPONDING] Fire units en route to scene...")
+            elif self.state == "SUPPRESSING":
+                print(f"{ts()} [SUPPRESSING] Actively suppressing fire, monitoring spread...")
             elif self.state == "RECOVERING":
-                print(f"{ts()} Agent recovering and closing mission...")
+                print(f"{ts()} [RECOVERING] Fire contained — site safety check in progress...")
 
     async def setup(self):
-        print(f"Reactive Agent {self.name} starting...")
+        print(f"Fire Response Agent {self.name} starting...")
         fsm_behaviour = self.FSMBehaviour()
         self.add_behaviour(fsm_behaviour)
 
 
+def random_suppression():
+    """Simulate damage reduction from fire suppression activity."""
+    import random
+    return random.randint(20, 60)
+
+
 async def main():
-    # For simplicity, run without XMPP for this demo
-    # In a full setup, this would be a SPADE agent with JID
-    agent = ReactiveAgent("reactive@localhost", "password")  # Dummy credentials
+    agent = FireResponseAgent("fire_response@localhost", "password")
     try:
-        # Skip start for demo, just run the behaviour
         await agent.setup()
         behaviour = agent.behaviours[0]
-        # Run for 30 seconds
         start_time = time.time()
         while time.time() - start_time < 30:
             await behaviour.run()

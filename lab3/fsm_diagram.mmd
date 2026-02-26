@@ -1,14 +1,14 @@
 stateDiagram-v2
     [*] --> IDLE
-    IDLE --> ALERT : new_event (severity != none)
-    ALERT --> RESPONDING : allocate_resources
-    RESPONDING --> RESCUING : arrive_on_scene
+    IDLE --> ALERT : fire_detected (severity != none)
+    ALERT --> RESPONDING : dispatch_fire_units
+    RESPONDING --> SUPPRESSING : units_arrived_on_scene
     RESPONDING --> IDLE : false_alarm
-    RESCUING --> RECOVERING : rescue_complete
-    RECOVERING --> IDLE : mission_closed
-    IDLE --> [*]
+    SUPPRESSING --> RECOVERING : fire_contained
+    RECOVERING --> IDLE : site_cleared
 
     %% Notes:
-    %% - Events come from `event_logs.txt` (sensor reports).
-    %% - Decisions (allocate_resources, arrive_on_scene, etc.) are made
-    %%   by the reactive agent in `lab3_agent.py` based on severity/damage.
+    %% - Fire events come from `event_logs.txt` (sensor reports).
+    %% - Fields: severity, damage, fire_type, location, spread_rate, casualties
+    %% - Rapid response triggered when spread_rate >= 5.0 m/min or damage >= 70
+    %% - Suppression reduces damage by a simulated 20–60 points
